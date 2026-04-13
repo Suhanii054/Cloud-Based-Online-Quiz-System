@@ -59,10 +59,10 @@ const Quiz = () => {
       const timeTaken = TOTAL_TIME - finalTimeLeft;
 
       // Fill unanswered questions with selectedIndex -1
-      const completeAnswers = qs.map((q) => {
-        const existing = finalAnswers.find((a) => a.questionId === q.questionId);
-        return existing || { questionId: q.questionId, selectedIndex: -1, correctIndex: q.correctIndex };
-      });
+      const answerMap = new Map(finalAnswers.map((a) => [a.questionId, a]));
+      const completeAnswers = qs.map((q) =>
+        answerMap.get(q.questionId) || { questionId: q.questionId, selectedIndex: -1, correctIndex: q.correctIndex }
+      );
 
       const score = completeAnswers.filter((a) => a.selectedIndex === a.correctIndex).length;
 
