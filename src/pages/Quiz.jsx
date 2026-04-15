@@ -85,8 +85,8 @@ const Quiz = () => {
     (chosenIndex, timedOut = false) => {
       clearInterval(timerRef.current);
 
-      // How long was spent on this question (seconds)
-      const secondsSpent = Math.round((Date.now() - questionStartRef.current) / 1000);
+      // How long was spent on this question (seconds); fallback to 0 if ref not yet set
+      const secondsSpent = Math.round((Date.now() - (questionStartRef.current ?? Date.now())) / 1000);
 
       // Resolve which answer to record (null if timed out with nothing selected)
       const answer = timedOut && chosenIndex === null ? null : chosenIndex;
@@ -95,8 +95,8 @@ const Quiz = () => {
       const newTimeTaken = [...timeTaken, secondsSpent];
 
       if (currentIndex + 1 >= questions.length) {
-        // Quiz finished — navigate to results
-        const totalMs = Date.now() - quizStartRef.current;
+        // Quiz finished — navigate to results; fallback to 0ms if ref not yet set
+        const totalMs = Date.now() - (quizStartRef.current ?? Date.now());
         navigate('/results', {
           state: {
             questions,
