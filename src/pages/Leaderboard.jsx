@@ -60,8 +60,7 @@ const Leaderboard = () => {
     };
 
     fetchLeaderboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [addLog]);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

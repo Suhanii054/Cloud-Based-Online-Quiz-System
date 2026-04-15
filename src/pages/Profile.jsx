@@ -49,17 +49,17 @@ const Profile = () => {
     ? profile.createdAt.toDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : '—';
 
-  // ── Average score ─────────────────────────────────────────────────────────
-  const avgScore = profile?.totalAttempts > 0
-    ? (profile.bestScore / profile.totalAttempts).toFixed(1)
+  // ── Best score as percentage of max (10 questions) ───────────────────────
+  const bestPct = profile?.totalAttempts > 0
+    ? `${Math.round(((profile.bestScore ?? 0) / 10) * 100)}%`
     : '—';
 
   // ── Stats grid config ─────────────────────────────────────────────────────
   const stats = [
-    { label: 'Best Score',     value: profile?.bestScore ?? 0, icon: <Star size={18} className="text-yellow-400" />,    color: 'text-yellow-400'  },
-    { label: 'Total Attempts', value: profile?.totalAttempts ?? 0, icon: <TrendingUp size={18} className="text-secondary" />, color: 'text-secondary'   },
-    { label: 'Global Rank',    value: rank ? `#${rank}` : '—', icon: <Trophy size={18} className="text-primary" />,     color: 'text-primary'     },
-    { label: 'Avg Score',      value: avgScore, icon: <Hash size={18} className="text-success" />,       color: 'text-success'     },
+    { label: 'Best Score',     value: profile?.bestScore ?? 0,       icon: <Star size={18} className="text-yellow-400" />,    color: 'text-yellow-400'  },
+    { label: 'Total Attempts', value: profile?.totalAttempts ?? 0,   icon: <TrendingUp size={18} className="text-secondary" />, color: 'text-secondary'   },
+    { label: 'Global Rank',    value: rank ? `#${rank}` : '—',       icon: <Trophy size={18} className="text-primary" />,     color: 'text-primary'     },
+    { label: 'Best %',         value: bestPct,                        icon: <Hash size={18} className="text-success" />,       color: 'text-success'     },
   ];
 
   // ── Render: loading ───────────────────────────────────────────────────────

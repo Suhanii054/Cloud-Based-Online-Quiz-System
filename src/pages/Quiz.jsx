@@ -30,8 +30,8 @@ const Quiz = () => {
   const [answers, setAnswers]            = useState([]);         // selected index per q
   const [timeTaken, setTimeTaken]        = useState([]);         // seconds spent per q
 
-  const questionStartRef = useRef(Date.now());  // when current question started
-  const quizStartRef     = useRef(null);        // when quiz overall started
+  const questionStartRef = useRef(null);  // set to Date.now() when quiz loads / question changes
+  const quizStartRef     = useRef(null);  // set to Date.now() when quiz loads
   const timerRef         = useRef(null);        // interval handle
 
   // ── Cloud Activity Helper ─────────────────────────────────────────────────
@@ -77,34 +77,10 @@ const Quiz = () => {
     };
 
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Per-Question Countdown Timer ─────────────────────────────────────────
-  useEffect(() => {
-    if (loading || questions.length === 0) return;
-
-    // Reset timer when question changes
-    setTimeLeft(QUESTION_TIME);
-    questionStartRef.current = Date.now();
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          // Time's up — auto-advance and mark as wrong (null = no selection)
-          clearInterval(timerRef.current);
-          handleAdvance(null, true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timerRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, loading, questions.length]);
+  }, [addLog]);
 
   // ── Advance to Next Question / Finish ────────────────────────────────────
+  // Declared before the timer effect so the effect can safely reference it.
   const handleAdvance = useCallback(
     (chosenIndex, timedOut = false) => {
       clearInterval(timerRef.current);
@@ -138,6 +114,33 @@ const Quiz = () => {
     },
     [answers, currentIndex, navigate, questions, timeTaken]
   );
+
+  // ── Per-Question Countdown Timer ─────────────────────────────────────────
+  useEffect(() => {
+    if (loading || questions.length === 0) return;
+
+    questionStartRef.current = Date.now();
+
+    // Reset the displayed timer via a callback (avoids synchronous setState in effect body)
+    const resetTimer = setTimeout(() => setTimeLeft(QUESTION_TIME), 0);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // Time's up — auto-advance and mark as wrong (null = no selection)
+          clearInterval(timerRef.current);
+          handleAdvance(null, true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearTimeout(resetTimer);
+      clearInterval(timerRef.current);
+    };
+  }, [currentIndex, loading, questions.length, handleAdvance]);
 
   // ── Option Selection ─────────────────────────────────────────────────────
   const handleSelect = (idx) => {
@@ -186,7 +189,7 @@ const Quiz = () => {
 
   // ── Render: Quiz UI ──────────────────────────────────────────────────────
   const question       = questions[currentIndex];
-  const progress       = ((currentIndex) / questions.length) * 100;
+  const progress = ((currentIndex + 1) / questions.length) * 100;
   const diffStyle      = DIFFICULTY_STYLES[question.difficulty] || DIFFICULTY_STYLES.easy;
   const timerDanger    = timeLeft <= 10;
 

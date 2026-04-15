@@ -88,8 +88,7 @@ const Results = () => {
     };
 
     syncToFirestore();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, addLog, firestoreDone, score]);
 
   // ── Guard: no quiz data ───────────────────────────────────────────────────
   if (!location.state || questions.length === 0) {
